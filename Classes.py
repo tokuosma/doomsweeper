@@ -1,8 +1,7 @@
 import random
 
-# Sisältää pelilaudan ja sen manipulointiin tarvitavat metodit
 class Board(list):
-
+    # The game board, basically just a two dimensional array containing Tiles
     def __init__(self, height, width, mines):
         self.height = height
         self.width = width
@@ -17,7 +16,6 @@ class Board(list):
             self.append([])
             for x in range(self.width):
                 self[y].append(Tile(y,x))
-
 
     def printBoard(self):
         # Prints Board to console
@@ -82,7 +80,7 @@ class Board(list):
                 self[y][x].adjustAdjacentMines(count)
                 
 class Tile(object):    
-
+    # Cell unit of Board
     def __init__(self,y,x):
         self.hidden = True
         self.y = y
@@ -103,9 +101,6 @@ class Tile(object):
     def adjustAdjacentMines(self, value):
         self.adjacentMines = value
     
-    
-                
-        
 board = Board(20,20,10)
 #board.printBoard()
 board.printBoardDebug()
