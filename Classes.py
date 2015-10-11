@@ -17,24 +17,18 @@ class Board(list,tk.Frame):
         self.initUI()
 
     def initUI(self):
+        # Configures the game grid and draws the buttons
         self.master.title("DOOMSWEEPER")
-
+        # Configures the grid
         for i in range(self.width):
-            self.columnconfigure(i, pad=0)
+            self.columnconfigure(i, pad=1)
         for i in range(self.height):
-            self.rowconfigure(i, pad=0)
-        self.createWidgets()
-
+            self.rowconfigure(i, pad=1)
+        # Draws tiles
         for i in range(self.height):
             for j in range(self.width):
                 self[i][j].drawTile()
-
         
-    def createWidgets(self):
-        self.quitButton = tk.Button(self, text="Quit", command=self.quit)
-        self.quitButton.grid()
-
-    
     def createBoard(self):
         # Fills board of specified dimensions with Tiles
         for y in range(self.height):
@@ -100,12 +94,11 @@ class Board(list,tk.Frame):
             self.x = x
             self.hasMine = False
             self.adjacentMines = 0
+            
 
         # Accessor functions
         def checkHidden(self):
             return self.hidden
-        def reveal(self):
-            self.hidden = False
         def checkHasMine(self):
             return self.hasMine
         def addMine(self):
@@ -115,10 +108,12 @@ class Board(list,tk.Frame):
         def adjustAdjacentMines(self, value):
             self.adjacentMines = value
         
-        def drawTile(self):
-            
+        def drawTile(self):            
             if self.hidden == True:
-                button = tk.Button(bd=2)
-                button.grid(column=self.x, row=self.y)
+                # Lambda is the bee's knees!
+                self.button = tk.Button(text="H", command= lambda: self.revealTile())
+                self.button.grid(column=self.x, row=self.y)
                 
-        
+        def revealTile(self):
+            self.button.destroy()
+                
