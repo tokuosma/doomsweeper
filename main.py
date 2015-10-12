@@ -1,7 +1,13 @@
 # Main program
 import Classes
+import tkinter as tk
+
 def main():
-    board = Classes.Board(6,6,6)
+    mainWindow = tk.Frame(master=None)
+    mainWindow.grid()
+    mainWindow.master.title("Doomsweeper")
+    
+    board = Classes.Board(15,15,40,mainWindow)
     board.printBoard()
     board.mainloop()
 

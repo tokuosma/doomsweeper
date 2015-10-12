@@ -6,12 +6,13 @@ class Board(list,tk.Frame):
     debug = True
     # format: (y,x)
     directions = [(1,0),(0,1),(-1,0),(0,-1)]
-    def __init__(self, height, width, mines,master=None):
+    def __init__(self, height, width, mines,master):
         tk.Frame.__init__(self,master)
         #Init. attributes
         self.height = height
         self.width = width
         self.mines = mines
+        self.master = master
         # Creates and initializes the board
         self.createBoard()
         self.addMines()
@@ -22,8 +23,7 @@ class Board(list,tk.Frame):
 
     def initUI(self):
         # Configures the game grid and draws the buttons
-        self.master.title("DOOMSWEEPER")
-        
+      
         # Configures the grid layout
         for i in range(self.width):
             self.columnconfigure(i, pad=1)
