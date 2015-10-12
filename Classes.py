@@ -3,13 +3,13 @@ import tkinter as tk
 
 # Sisältää pelilaudan ja sen manipulointiin tarvitavat metodit
 class Board(list,tk.Frame):
-
+    debug = True
     def __init__(self, height, width, mines,master=None):
         tk.Frame.__init__(self,master)
         self.height = height
         self.width = width
         self.mines = mines
-        self.debug = True
+        
         self.createBoard()
         self.addMines()
         self.updateTiles()
@@ -19,6 +19,7 @@ class Board(list,tk.Frame):
     def initUI(self):
         # Configures the game grid and draws the buttons
         self.master.title("DOOMSWEEPER")
+        
         # Configures the grid
         for i in range(self.width):
             self.columnconfigure(i, pad=1)
@@ -28,28 +29,27 @@ class Board(list,tk.Frame):
         for i in range(self.height):
             for j in range(self.width):
                 self[i][j].drawTile()
-        
+            
     def createBoard(self):
         # Fills board of specified dimensions with Tiles
         for y in range(self.height):
             self.append([])
             for x in range(self.width):
-                self[y].append(self.Tile(y,x))
+                self[y].append(self.Tile(y,x,self))
 
     def printBoard(self):
         # Prints Board to console
         for y in range(self.height):
             print("") #newline
             for x in range(self.width):
-                if(self[y][x].checkHidden() and self.debug == False):
+                if(self[y][x].hidden and self.debug == False):
                     print(" H ",end="")
                 else:
-                    if( self[y][x].checkHasMine() == True):
+                    if( self[y][x].hasMine == True):
                         print(" M ",end="")
                     else:
-                        print(" %s " % str(self[y][x].checkAdjacentMines()),end="" )
+                        print(" %s " % str(self[y][x].adjacentMines),end="" )
                         
-   
     def addMines(self):
         # Adds the number of mines specified to board
         count=self.mines
@@ -58,7 +58,7 @@ class Board(list,tk.Frame):
             y = random.randint(0,self.height-1)
             print("Arvottiin: %i ja %i"%(x,y))
             if(self[y][x].hasMine == False):
-                self[y][x].addMine()
+                self[y][x].hasMine = True
                 count -= 1
                 
     def updateTiles(self):
@@ -66,54 +66,99 @@ class Board(list,tk.Frame):
         # and updates the value of adjacentMines on Tile.
         for y in range(self.height):
             for x in range(self.width):
-                print("Starting work on tile (y=%i,x=%i)"%(y,x))
                 count = 0
                 for i in range(y-1,y+2):
                     # Skips rows not on Board
                     if i < 0 or i >= self.height:
-                        print("Skipping row %i."%i)
                         continue
                     for j in range(x-1,x+2):
                         # Skips columns not on Board
                         if j < 0 or j >= self.width:
-                            print("Skipping column %i"%j)
                             continue
                         # Skips curent tile
                         elif i == y and j == x:
-                            print("Skipping current tile")
                             continue
-                        elif self[i][j].checkHasMine() == True:
+                        elif self[i][j].hasMine == True:
                             count += 1                                            
-                self[y][x].adjustAdjacentMines(count)
-                
+                self[y][x].adjacentMines = count
+       
+            
     class Tile():    
 
-        def __init__(self,y,x):
+        def __init__(self,y,x,master):
+            self.master = master
             self.hidden = True
             self.y = y
             self.x = x
             self.hasMine = False
             self.adjacentMines = 0
             
-
-        # Accessor functions
-        def checkHidden(self):
-            return self.hidden
-        def checkHasMine(self):
-            return self.hasMine
-        def addMine(self):
-            self.hasMine = True
-        def checkAdjacentMines(self):
-            return self.adjacentMines
-        def adjustAdjacentMines(self, value):
-            self.adjacentMines = value
+        # TEMPORARY!
         
-        def drawTile(self):            
+        
+        def drawTile(self):
+            self.canvas=tk.Canvas()
+            self.canvas.grid(column=self.x,row=self.y)
+            self.label = self.createLabel()
+            self.label.grid()
+            
             if self.hidden == True:
                 # Lambda is the bee's knees!
-                self.button = tk.Button(text="H", command= lambda: self.revealTile())
-                self.button.grid(column=self.x, row=self.y)
+                self.button = tk.Button(self.label, command=lambda: self.reveal())
+                self.button.grid()
+
+        def generateText(self):
+            if self.hasMine == True:
+                return "M"
+            elif self.adjacentMines > 0:
+                return str(self.adjacentMines)
+            else:
+                return ""
+
+        def createLabel(self):
+            # Creates and returns a label for a Tile
+            if self.hasMine == True:
+                icon = tk.PhotoImage(file="caco.gif")
+                label = tk.Label(self.canvas,image=icon)
+                self.icon = icon
                 
-        def revealTile(self):
+                return label
+            elif self.adjacentMines > 0:
+                label= tk.Label(self.canvas, text=self.generateText())
+                return label
+            else:
+                label = tk.Label(self.canvas, text="")
+                return label
+                
+                
+                
+        def reveal(self):
+            self.hidden = False
             self.button.destroy()
+            if self.adjacentMines == 0 and self.hasMine == False:
+                for i in range(self.y - 1,self.y + 2):
+                    if i < 0 or i >= self.master.height:
+                        continue
+                    for j in range(self.x - 1, self.y + 2):
+                        if j < 0 or j >= self.master.width:
+                            continue
+                        if self.master[i][j].hidden == True and self.master[i][j].hasMine == False:
+                            if self.master[i][j].adjacentMines == 0:
+                                self.master[i][j].reveal()
+                            elif self.master[i][j].adjacentMines > 0:
+                                self.master[i][j].hidden = False
+                                self.master[i][j].button.destroy()
+                            
+                        
+
+
+        
+        
+
+                  
+                  
+                
+                
+       
+            
                 
