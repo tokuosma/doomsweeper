@@ -4,15 +4,19 @@ import tkinter as tk
 # Sisältää pelilaudan ja sen manipulointiin tarvitavat metodit
 class Board(list,tk.Frame):
     debug = True
+    # format: (y,x)
+    directions = [(1,0),(0,1),(-1,0),(0,-1)]
     def __init__(self, height, width, mines,master=None):
         tk.Frame.__init__(self,master)
+        #Init. attributes
         self.height = height
         self.width = width
         self.mines = mines
-        
+        # Creates and initializes the board
         self.createBoard()
         self.addMines()
         self.updateTiles()
+        # Init. the UI
         self.grid()
         self.initUI()
 
@@ -20,7 +24,7 @@ class Board(list,tk.Frame):
         # Configures the game grid and draws the buttons
         self.master.title("DOOMSWEEPER")
         
-        # Configures the grid
+        # Configures the grid layout
         for i in range(self.width):
             self.columnconfigure(i, pad=1)
         for i in range(self.height):
@@ -49,6 +53,7 @@ class Board(list,tk.Frame):
                         print(" M ",end="")
                     else:
                         print(" %s " % str(self[y][x].adjacentMines),end="" )
+        print("BUTT")
                         
     def addMines(self):
         # Adds the number of mines specified to board
@@ -81,7 +86,9 @@ class Board(list,tk.Frame):
                         elif self[i][j].hasMine == True:
                             count += 1                                            
                 self[y][x].adjacentMines = count
-       
+
+    def gameOver(self):
+        print("GAMEOVER")      
             
     class Tile():    
 
@@ -92,63 +99,74 @@ class Board(list,tk.Frame):
             self.x = x
             self.hasMine = False
             self.adjacentMines = 0
-            
-        # TEMPORARY!
-        
         
         def drawTile(self):
+            # Draws the Tile to the Board at the beginnig of the game
+            # First creates a canvas and assigns it to the proper place on grid
             self.canvas=tk.Canvas()
             self.canvas.grid(column=self.x,row=self.y)
-            self.label = self.createLabel()
+            # Next creates a label for tile and places it on canvas
+            self.label = self.createLabel(self.canvas)
             self.label.grid()
-            
-            if self.hidden == True:
-                # Lambda is the bee's knees!
-                self.button = tk.Button(self.label, command=lambda: self.reveal())
-                self.button.grid()
+            # Finally creates a button on top of the label
+            self.button = tk.Button(self.label,bd=3, command=lambda: self.reveal())
+            self.button.grid()
 
         def generateText(self):
-            if self.hasMine == True:
-                return "M"
-            elif self.adjacentMines > 0:
+            # Generates a string containing the number of mines for the tile label
+            if self.adjacentMines > 0:
                 return str(self.adjacentMines)
             else:
                 return ""
 
-        def createLabel(self):
-            # Creates and returns a label for a Tile
+        def createLabel(self,master):
+            # Creates and returns a label for a Tile.
+            # if Tile has mine, returns a label with image
             if self.hasMine == True:
                 icon = tk.PhotoImage(file="caco.gif")
-                label = tk.Label(self.canvas,image=icon)
-                self.icon = icon
-                
+                label = tk.Label(master,image=icon)
+                # saves the photo as an attribute
+                self.icon = icon               
                 return label
+            # if no tile has no mine, returns a label containing the number of mines
+            # on adjacen squares
             elif self.adjacentMines > 0:
                 label= tk.Label(self.canvas, text=self.generateText())
                 return label
+            # If no mines on adjacent squares, returns an empty label
             else:
                 label = tk.Label(self.canvas, text="")
                 return label
-                
-                
-                
+                               
         def reveal(self):
+            # Command issued when button over tile is pressed.
+            # Destroys the button and makes the label visible
+            # Also reveals neighbouring tiles that do not contain mines
+            # and all empty tiles connected to a revealed empty tile            
             self.hidden = False
             self.button.destroy()
-            if self.adjacentMines == 0 and self.hasMine == False:
-                for i in range(self.y - 1,self.y + 2):
-                    if i < 0 or i >= self.master.height:
-                        continue
-                    for j in range(self.x - 1, self.y + 2):
-                        if j < 0 or j >= self.master.width:
-                            continue
-                        if self.master[i][j].hidden == True and self.master[i][j].hasMine == False:
-                            if self.master[i][j].adjacentMines == 0:
-                                self.master[i][j].reveal()
-                            elif self.master[i][j].adjacentMines > 0:
-                                self.master[i][j].hidden = False
-                                self.master[i][j].button.destroy()
-                            
+
+            if self.hasMine == True:
+                self.master.gameOver()
+            elif self.adjacentMines == 0:
+                for direction in self.master.directions:
+                    y = self.y + direction[0]
+                    x = self.x + direction[1]
+                    if self.isOnBoard(y,x):
+                        if self.master[y][x].hidden == True:
+                            self.master[y][x].reveal()
+
+        def isOnBoard(self,y,x):
+            # if a tile at coordinates (x,y) is on board returns True
+            if y >= 0 and y < self.master.height:
+                if x >= 0 and x < self.master.width:
+                    return True
+                else:
+                    return False
+            else:
+                return False
+                
+                
                         
 
 
