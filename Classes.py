@@ -39,6 +39,7 @@ class Board(list,tk.Frame):
         for y in range(self.height):
             self.append([])
             for x in range(self.width):
+
                 self[y].append(self.Tile(y,x,self))
 
     def printBoard(self):
@@ -84,7 +85,7 @@ class Board(list,tk.Frame):
                         elif i == y and j == x:
                             continue
                         elif self[i][j].hasMine == True:
-                            count += 1                                            
+                            count += 1
                 self[y][x].adjacentMines = count
 
     def gameOver(self):
@@ -119,6 +120,7 @@ class Board(list,tk.Frame):
             else:
                 return ""
 
+
         def createLabel(self,master):
             # Creates and returns a label for a Tile.
             # if Tile has mine, returns a label with image
@@ -128,8 +130,8 @@ class Board(list,tk.Frame):
                 # saves the photo as an attribute
                 self.icon = icon               
                 return label
-            # if no tile has no mine, returns a label containing the number of mines
-            # on adjacen squares
+            # if no tile has no mine, returns a label containing the
+            # number of mines on adjacent squares
             elif self.adjacentMines > 0:
                 label= tk.Label(self.canvas, text=self.generateText())
                 return label
