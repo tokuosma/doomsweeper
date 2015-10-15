@@ -67,29 +67,50 @@ class NewGameMenu(tk.Frame):
         self.parent = parent
         self.controller = controller
         self.config(width=controller.size[0], height=controller.size[1])
+        self.inputHeight = 16
+        self.inputWidth = 16
+        self.inputMines = 40
+        self.createWidgets()
         
+    def createWidgets(self):
+        
+        # Wraps the validateEntry method for use in entry validation
+        validateEntry = self.register(self.validateEntry)
+        
+        # Labels
         labelTitle = tk.Label(self, text="NEW GAME",padx=10)
         labelHeight = tk.Label(self, text="Height:")
         labelWidth = tk.Label(self, text="Width:")
         labelMines = tk.Label(self, text="Mines")
-
-        buttonAddHeight = tk.Button(self, text="+")
-        buttonSubHeight = tk.Button(self, text="-")
-        buttonAddWidth = tk.Button(self, text="+")
-        buttonSubWidth = tk.Button(self, text="-")
-        buttonAddMines = tk.Button(self, text="+")
-        buttonSubMines = tk.Button(self, text="-")
-        buttonBack = tk.Button(self, text="BACK",width=20,
+        # Buttons
+        buttonAddHeight = tk.Button(self,width=1,height=1,padx=0,pady=0, text="+",
+                                    command=self.changeEntry("height",1))
+        buttonSubHeight = tk.Button(self,width=1,height=1,padx=0,pady=0, text="-",
+                                    command=self.changeEntry("height",-1))
+        buttonAddWidth = tk.Button(self,width=1,height=1,padx=0,pady=0, text="+",
+                                   command=self.changeEntry("width",1))
+        buttonSubWidth = tk.Button(self,width=1,height=1,padx=0,pady=0, text="-",
+                                   command=self.changeEntry("width",-1))
+        buttonAddMines = tk.Button(self,width=1,height=1,padx=0,pady=0, text="+",
+                                   command=self.changeEntry("mines",1))
+        buttonSubMines = tk.Button(self,width=1,height=1,padx=0,pady=0, text="-",
+                                   command=self.changeEntry("mines",-1))
+        buttonBack = tk.Button(self, text="BACK",width=10,
                                command=lambda: self.controller.showFrame(MainMenu))
-                
-        entryHeight = tk.Entry(self)
-        entryWidth= tk.Entry(self)
-        entryMines = tk.Entry(self)
-        
+        buttonStart = tk.Button(self,width=10, text="START")
+        # Entries
+        entryHeight = tk.Entry(self,width=5,validate="all",vcmd=(validateEntry,'%S','%P'))
+        entryHeight.insert(0,str(self.inputHeight))
+        entryWidth= tk.Entry(self,width=5)
+        entryWidth.insert(0, str(self.inputWidth))
+        entryMines = tk.Entry(self,width=5)
+        entryMines.insert(0,str(self.inputMines))
+
+        # Grid all widgets
         labelTitle.grid(row=0, columnspan=3)
         labelHeight.grid(row=1,rowspan=2)
-        labelWidth.grid(row=3,rowspan=2,sticky=tk.W)
-        labelMines.grid(row=5,rowspan=2,sticky=tk.W)
+        labelWidth.grid(row=3,rowspan=2)
+        labelMines.grid(row=5,rowspan=2)
 
         entryHeight.grid(row=1,rowspan=2, column=2)
         entryWidth.grid(row=3,rowspan=2, column=2)
@@ -97,5 +118,32 @@ class NewGameMenu(tk.Frame):
 
         buttonAddHeight.grid(row=1,column=1)
         buttonSubHeight.grid(row=2,column=1)
-        buttonBack.grid()
+        buttonAddWidth.grid(row=3,column=1)
+        buttonSubWidth.grid(row=4,column=1)
+        buttonAddMines.grid(row=5,column=1)
+        buttonSubMines.grid(row=6,column=1)
+        buttonStart.grid(row=7,columnspan=3)
+        buttonBack.grid(row=8,columnspan=3)
         
+    def changeEntry(self,target,value):
+        
+        if target == "height":
+            self.inputHeight += value
+            print(self.inputHeight)
+            
+        elif target == "width":
+            self.inputWidth += value
+        elif target == "mines":
+            self.inputMines += value
+
+    def validateEntry(self,insert,text):
+        # BROKEN!
+        try:
+            int(insert)
+            if int(text) <= 100:
+                return True
+            else:
+                self.insert(0,"100")
+                return True
+        except :
+            return False
