@@ -67,7 +67,6 @@ class MainMenu(tk.Frame):
 class NewGameMenu(tk.Frame):
     
     fields = ["Height", "Width", "Mines"]
-
     def __init__(self,parent,controller):
         tk.Frame.__init__(self, parent)
         self.parent = parent
@@ -75,29 +74,45 @@ class NewGameMenu(tk.Frame):
         self.config(width=controller.size[0], height=controller.size[1])
         self.createWidgets()
         
+        
     def createWidgets(self):
+        # List that will contain all fields and the entry widgets within the fields
+        self.entries = {}
+        addSubCmd = self.register(self.changeEntry)
         title = tk.Label(self, text="NEW GAME")
         title.grid()
         for field in self.fields:
             row = tk.Frame(self)
             label = tk.Label(row, text=field, width=6)
-            addBtn = tk.Button(row, text="+", padx=1, pady=1, width=1, height=1, anchor=tk.CENTER)
-            subBtn = tk.Button(row, text="-", padx=1, pady=1, width=1, height=1)
-            entry = tk.Entry(row, width=10)
+            addBtn = tk.Button(row, text="+", padx=1, pady=1, width=1, height=1,
+                               command=(addSubCmd,field,1))
+            subBtn = tk.Button(row, text="-", padx=1, pady=1, width=1, height=1,
+                               command=(addSubCmd,field,-1))
+            entry = tk.Entry(row, width=3)
+            entry.insert(10,str(16))
             row.grid()
-            label.grid(row=1, padx=3, rowspan=2, column=1, sticky='e')
-            addBtn.grid(row=1, padx=10, column=2, sticky='w')
-            subBtn.grid(row=2, padx=10,  column=2, sticky='w')
-            entry.grid(row=1, padx=3, rowspan=2, column=3, sticky='e')
+            label.grid(row=1, padx=3, rowspan=2, column=1)
+            addBtn.grid(row=1, padx=10, column=2)
+            subBtn.grid(row=2, padx=10,  column=2)
+            entry.grid(row=1, padx=3, rowspan=2, column=3)
+            self.entries[field] = entry
             
         backButton = tk.Button(self, text="Back", command=lambda:self.controller.showFrame(MainMenu))
         backButton.grid()
         
         
     # Command for + and - buttons to change the value in the entry field
-    def changeEntry(self,target,value):
-        # TBD
-        pass
+    def changeEntry(self,field,value):
+        currentValue = int(self.entries[field].get())
+        if currentValue <= 2:
+            return
+        newValue = currentValue + int(value)
+        if newValue > 100:
+            return
+        self.entries[field].delete(0,tk.END)
+        self.entries[field].insert(10,str(newValue))
+        
+        
     
     # Function for new game menu entry validation. insert is the text to be inserted
     # to the entry and text is the string in the entry field after insertion
